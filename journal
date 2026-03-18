@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MNQ Journal">
+<title>MNQ Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: #080808; color: #fff; font-family: 'IBM Plex Sans', sans-serif; padding: 20px 16px 60px; max-width: 480px; margin: 0 auto; }
+  ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: #111; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  .bebas { font-family: 'Bebas Neue', cursive; }
+  input, select, textarea { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 10px 12px; font-size: 14px; font-family: 'IBM Plex Mono', monospace; outline: none; width: 100%; }
+  select option { background: #1a1a1a; }
+  .label { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; font-family: 'IBM Plex Mono', monospace; }
+  .btn-primary { background: #d4ff00; color: #000; border: none; border-radius: 8px; padding: 13px 24px; font-size: 13px; font-family: 'IBM Plex Mono', monospace; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; width: 100%; }
+  .btn-outline { background: transparent; border: 1px solid #d4ff00; color: #d4ff00; border-radius: 8px; padding: 10px 18px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; letter-spacing: 1px; }
+  .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 18px; }
+  .tab { background: none; border: none; border-bottom: 2px solid transparent; color: #555; padding: 10px 14px; font-size: 12px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; letter-spacing: 1px; margin-bottom: -1px; transition: all 0.2s; }
+  .tab.active { color: #d4ff00; border-bottom-color: #d4ff00; }
+  .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px 16px; flex: 1; min-width: 100px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .toggle-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #222; background: transparent; color: #444; font-size: 12px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; transition: all 0.15s; }
+  .toggle-btn.active-yes { border-color: #4ade80; background: rgba(74,222,128,0.1); color: #4ade80; }
+  .toggle-btn.active-no { border-color: #f87171; background: rgba(248,113,113,0.1); color: #f87171; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 0.2s ease; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px">
+    <div>
+      <div class="mono" style="font-size:10px;color:#d4ff00;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px">● MNQ · Futuros</div>
+      <h1 class="bebas" style="font-size:38px;letter-spacing:2px;line-height:1">Trading Journal</h1>
+      <div class="mono" style="font-size:11px;color:#444;margin-top:3px">Pivot to Pivot · Sócrates Trades</div>
+    </div>
+    <button class="btn-outline" onclick="toggleForm()" id="form-toggle-btn">+ Trade</button>
+  </div>
+
+  <!-- Stats -->
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px" id="stats-row"></div>
+
+  <!-- Form -->
+
+  <div id="trade-form" style="display:none" class="fade-in">
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(212,255,0,0.2);border-radius:14px;padding:20px;margin-bottom:20px">
+      <div class="mono" style="font-size:11px;color:#d4ff00;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px">Registrar Trade</div>
+      <div class="form-grid">
+        <div><div class="label">Fecha</div><input type="date" id="f-date"></div>
+        <div><div class="label">Hora</div><input type="time" id="f-time"></div>
+        <div>
+          <div class="label">Dirección</div>
+          <select id="f-direction"><option>LONG</option><option>SHORT</option></select>
+        </div>
+        <div>
+          <div class="label">Contratos</div>
+          <select id="f-contracts"><option value="2">2</option><option value="4">4</option></select>
+        </div>
+        <div>
+          <div class="label">Setup</div>
+          <select id="f-setup">
+            <option>Pivot to Pivot</option>
+            <option>Ruptura de Estructura</option>
+            <option>Level to Level</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">Sesión</div>
+          <select id="f-session">
+            <option>London</option>
+            <option>New York AM</option>
+            <option>New York PM</option>
+            <option>Overlap</option>
+          </select>
+        </div>
+        <div><div class="label">Entrada</div><input type="number" id="f-entry" placeholder="21450"></div>
+        <div><div class="label">Stop Loss</div><input type="number" id="f-sl" placeholder="21430"></div>
+        <div><div class="label">Take Profit</div><input type="number" id="f-tp" placeholder="21490"></div>
+        <div><div class="label">Resultado ($)</div><input type="number" id="f-result" placeholder="+120 o -80"></div>
+        <div>
+          <div class="label">Estado mental</div>
+          <select id="f-emotion">
+            <option>Disciplinado</option>
+            <option>Impaciente</option>
+            <option>Con miedo</option>
+            <option>Confiado</option>
+            <option>Revenge</option>
+          </select>
+        </div>
+        <div>
+          <div class="label">¿Seguiste el plan?</div>
+          <div style="display:flex;gap:8px;margin-top:2px">
+            <button class="toggle-btn" id="btn-yes" onclick="setPlan(true)">SÍ</button>
+            <button class="toggle-btn" id="btn-no" onclick="setPlan(false)">NO</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div class="label">Notas</div>
+        <textarea id="f-notes" rows="2" placeholder="¿Qué viste? ¿Confluencia? ¿Qué salió bien o mal?"></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveTrade()">Guardar Trade</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+
+  <div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:18px">
+    <button class="tab active" onclick="setTab('trades')" id="tab-trades">TRADES</button>
+    <button class="tab" onclick="setTab('stats')" id="tab-stats">ANÁLISIS</button>
+  </div>
+
+  <!-- Trades list -->
+
+  <div id="trades-view"></div>
+  <!-- Stats view -->
+  <div id="stats-view" style="display:none"></div>
+</div>
+
+<script>
+let trades = JSON.parse(localStorage.getItem('mnq_trades') || '[]');
+let followedPlan = true;
+let currentTab = 'trades';
+
+function save() { localStorage.setItem('mnq_trades', JSON.stringify(trades)); }
+
+function fmt(val) {
+  const n = parseFloat(val);
+  if (isNaN(n)) return '$0.00';
+  return (n >= 0 ? '+' : '-') + '$' + Math.abs(n).toFixed(2);
+}
+
+function setPlan(val) {
+  followedPlan = val;
+  document.getElementById('btn-yes').className = 'toggle-btn' + (val ? ' active-yes' : '');
+  document.getElementById('btn-no').className = 'toggle-btn' + (!val ? ' active-no' : '');
+}
+setPlan(true);
+
+function toggleForm() {
+  const f = document.getElementById('trade-form');
+  const btn = document.getElementById('form-toggle-btn');
+  const visible = f.style.display !== 'none';
+  f.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '+ Trade' : '✕ Cerrar';
+  if (!visible) {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-date').value = today;
+    const now = new Date();
+    document.getElementById('f-time').value = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  }
+}
+
+function saveTrade() {
+  const result = document.getElementById('f-result').value;
+  if (!result) { alert('El resultado es obligatorio'); return; }
+  const trade = {
+    id: Date.now(),
+    date: document.getElementById('f-date').value,
+    time: document.getElementById('f-time').value,
+    direction: document.getElementById('f-direction').value,
+    contracts: document.getElementById('f-contracts').value,
+    setup: document.getElementById('f-setup').value,
+    session: document.getElementById('f-session').value,
+    entry: document.getElementById('f-entry').value,
+    sl: document.getElementById('f-sl').value,
+    tp: document.getElementById('f-tp').value,
+    result: parseFloat(result),
+    emotion: document.getElementById('f-emotion').value,
+    followed_plan: followedPlan,
+    notes: document.getElementById('f-notes').value,
+  };
+  trades.unshift(trade);
+  save();
+  ['f-entry','f-sl','f-tp','f-result','f-notes'].forEach(id => document.getElementById(id).value = '');
+  setPlan(true);
+  toggleForm();
+  render();
+}
+
+function deleteTrade(id) {
+  if (!confirm('¿Eliminar este trade?')) return;
+  trades = trades.filter(t => t.id !== id);
+  save();
+  render();
+}
+
+function setTab(tab) {
+  currentTab = tab;
+  document.getElementById('trades-view').style.display = tab === 'trades' ? 'block' : 'none';
+  document.getElementById('stats-view').style.display = tab === 'stats' ? 'block' : 'none';
+  document.getElementById('tab-trades').className = 'tab' + (tab === 'trades' ? ' active' : '');
+  document.getElementById('tab-stats').className = 'tab' + (tab === 'stats' ? ' active' : '');
+}
+
+function getStats() {
+  if (!trades.length) return { total:0, wins:0, losses:0, winrate:0, pnl:0, best:0, worst:0 };
+  const wins = trades.filter(t => t.result > 0);
+  const losses = trades.filter(t => t.result < 0);
+  const pnl = trades.reduce((a,t) => a + t.result, 0);
+  const best = Math.max(...trades.map(t => t.result));
+  const worst = Math.min(...trades.map(t => t.result));
+  return { total: trades.length, wins: wins.length, losses: losses.length, winrate: Math.round(wins.length/trades.length*100), pnl, best, worst };
+}
+
+function renderStats() {
+  const s = getStats();
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="label">P&L Total</div><div class="bebas" style="font-size:24px;color:${s.pnl>=0?'#4ade80':'#f87171'}">${fmt(s.pnl)}</div></div>
+    <div class="stat-card"><div class="label">Win Rate</div><div class="bebas" style="font-size:24px;color:${s.winrate>=50?'#4ade80':'#f87171'}">${s.winrate}%</div><div class="mono" style="font-size:10px;color:#444;margin-top:2px">${s.wins}W · ${s.losses}L</div></div>
+    <div class="stat-card"><div class="label">Trades</div><div class="bebas" style="font-size:24px">${s.total}</div></div>
+    <div class="stat-card"><div class="label">Mejor</div><div class="bebas" style="font-size:24px;color:#4ade80">${fmt(s.best)}</div></div>
+  `;
+}
+
+function renderTradesList() {
+  const el = document.getElementById('trades-view');
+  if (!trades.length) {
+    el.innerHTML = `<div style="text-align:center;padding:50px 0;color:#333"><div style="font-size:36px;margin-bottom:12px">📋</div><div class="mono" style="font-size:12px;letter-spacing:1px">Sin trades registrados</div><div class="mono" style="font-size:11px;color:#222;margin-top:6px">Presiona "+ Trade" para comenzar</div></div>`;
+    return;
+  }
+  el.innerHTML = trades.map(t => {
+    const isWin = t.result > 0;
+    const color = isWin ? '#4ade80' : '#f87171';
+    const borderColor = isWin ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.2)';
+    return `
+    <div style="background:rgba(255,255,255,0.02);border:1px solid ${borderColor};border-left:3px solid ${color};border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <span style="background:${isWin?'rgba(74,222,128,0.1)':'rgba(248,113,113,0.1)'};color:${color};border-radius:4px;padding:2px 8px;font-size:11px;font-family:'IBM Plex Mono',monospace;font-weight:700">${t.direction}</span>
+          <span class="mono" style="font-size:11px;color:#444;margin-left:8px">${t.date} ${t.time}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="bebas" style="font-size:22px;color:${color}">${fmt(t.result)}</span>
+          <button onclick="deleteTrade(${t.id})" style="background:none;border:none;color:#333;font-size:14px;cursor:pointer;padding:0">✕</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:13px;color:#ccc">${t.setup}</div>
+          <div class="mono" style="font-size:10px;color:#444;margin-top:2px">${t.session} · ${t.contracts} contratos</div>
+        </div>
+        <div style="text-align:right">
+          <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${t.followed_plan?'#4ade80':'#f87171'};margin-right:5px"></span>
+          <span style="font-size:11px;color:#555">${t.emotion}</span>
+        </div>
+      </div>
+      ${t.notes ? `<div class="mono" style="font-size:11px;color:#444;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.04)">${t.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderAnalysis() {
+  const el = document.getElementById('stats-view');
+  if (!trades.length) { el.innerHTML = `<div style="text-align:center;padding:40px;color:#333" class="mono">Sin datos suficientes</div>`; return; }
+
+  const setups = ['Pivot to Pivot','Ruptura de Estructura','Level to Level','Otro'];
+  const emotions = ['Disciplinado','Impaciente','Con miedo','Confiado','Revenge'];
+
+  const setupRows = setups.map(s => {
+    const ts = trades.filter(t => t.setup === s);
+    if (!ts.length) return '';
+    const wins = ts.filter(t => t.result > 0).length;
+    const pnl = ts.reduce((a,t) => a+t.result, 0);
+    const wr = Math.round(wins/ts.length*100);
+    return `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:13px">${s}</span>
+        <span class="mono" style="font-size:12px;color:${pnl>=0?'#4ade80':'#f87171'}">${fmt(pnl)}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${wr}%;background:${wr>=50?'#4ade80':'#f87171'};border-radius:3px;transition:width 0.4s"></div>
+        </div>
+        <span class="mono" style="font-size:10px;color:#555;min-width:65px;text-align:right">${wr}% · ${ts.length}t</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const emotionRows = emotions.map(em => {
+    const ts = trades.filter(t => t.emotion === em);
+    if (!ts.length) return '';
+    const pnl = ts.reduce((a,t) => a+t.result, 0);
+    const wins = ts.filter(t => t.result > 0).length;
+    const wr = Math.round(wins/ts.length*100);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="font-size:13px">${em}</span>
+      <div style="display:flex;gap:12px" class="mono">
+        <span style="font-size:11px;color:#555">${ts.length}t</span>
+        <span style="font-size:11px;color:${wr>=50?'#4ade80':'#f87171'}">${wr}%</span>
+        <span style="font-size:11px;color:${pnl>=0?'#4ade80':'#f87171'};min-width:65px;text-align:right">${fmt(pnl)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  const planYes = trades.filter(t => t.followed_plan);
+  const planNo = trades.filter(t => !t.followed_plan);
+  const planRows = [[planYes,'SÍ seguí el plan','#4ade80'],[planNo,'NO seguí el plan','#f87171']].map(([ts,label,color]) => {
+    if (!ts.length) return '';
+    const pnl = ts.reduce((a,t) => a+t.result, 0);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:7px;height:7px;border-radius:50%;background:${color}"></div>
+        <span style="font-size:13px">${label}</span>
+      </div>
+      <div style="display:flex;gap:12px" class="mono">
+        <span style="font-size:11px;color:#555">${ts.length}t</span>
+        <span style="font-size:11px;color:${pnl>=0?'#4ade80':'#f87171'}">${fmt(pnl)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:14px">
+      <div class="label" style="margin-bottom:14px">Rendimiento por Setup</div>
+      ${setupRows || '<div class="mono" style="font-size:12px;color:#333">Sin datos</div>'}
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="label" style="margin-bottom:14px">Estado Mental</div>
+      ${emotionRows || '<div class="mono" style="font-size:12px;color:#333">Sin datos</div>'}
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="label" style="margin-bottom:14px">Disciplina de Plan</div>
+      ${planRows || '<div class="mono" style="font-size:12px;color:#333">Sin datos</div>'}
+    </div>
+  `;
+}
+
+function render() {
+  renderStats();
+  renderTradesList();
+  renderAnalysis();
+}
+
+render();
+</script>
+
+</body>
+</html>
